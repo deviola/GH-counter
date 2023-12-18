@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     private final GitHubClient gitHubClient;
-    private final UserRepository requestRepository;
+    private final UserRepository userRepository;
 
-    public UserService(GitHubClient gitHubClient, UserRepository requestRepository) {
+    public UserService(GitHubClient gitHubClient, UserRepository userRepository) {
         this.gitHubClient = gitHubClient;
-        this.requestRepository = requestRepository;
+        this.userRepository = userRepository;
     }
 
     public UserResponse getUserByLogin(String login) {
@@ -28,11 +28,11 @@ public class UserService {
             throw new UserNotFoundException();
         }
 
-        User requestedUser = requestRepository.findByLogin(login)
+        User requestedUser = userRepository.findByLogin(login)
                 .orElseGet(() -> new User(gitHubUser.getLogin(), 0L));
 
         requestedUser.setRequestCount(requestedUser.getRequestCount() + 1);
-        requestRepository.save(requestedUser);
+        userRepository.save(requestedUser);
 
         Double calculations = calculate(gitHubUser);
         return createUserResponseFromGitHubUser(gitHubUser, calculations);
